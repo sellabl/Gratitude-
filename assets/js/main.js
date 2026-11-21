@@ -1,6 +1,23 @@
 (() => {
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+  /* ---- Language-dependent strings (page language comes from <html lang>) ---- */
+  const TEXT = {
+    en: {
+      menuOpen: "Open menu", menuClose: "Close menu",
+      topic: "General question",
+      subject: (topic, name) => `${topic} — from ${name}`,
+      sent: "Your email app should open with the message ready to send.",
+    },
+    es: {
+      menuOpen: "Abrir menú", menuClose: "Cerrar menú",
+      topic: "Consulta general",
+      subject: (topic, name) => `${topic} — de ${name}`,
+      sent: "Se abrirá tu aplicación de correo con el mensaje listo para enviar.",
+    },
+  };
+  const t = TEXT[document.documentElement.lang] || TEXT.en;
+
   /* ---- Mobile menu ---- */
   const nav = document.querySelector(".nav");
   const menuBtn = document.querySelector(".menu-btn");
@@ -8,12 +25,12 @@
     const setOpen = (open) => {
       nav.classList.toggle("is-open", open);
       menuBtn.setAttribute("aria-expanded", String(open));
-      menuBtn.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+      menuBtn.setAttribute("aria-label", open ? t.menuClose : t.menuOpen);
     };
     menuBtn.addEventListener("click", () => setOpen(!nav.classList.contains("is-open")));
     nav.querySelectorAll(".mobile-menu a").forEach((a) => a.addEventListener("click", () => setOpen(false)));
     document.addEventListener("keydown", (e) => { if (e.key === "Escape") setOpen(false); });
-    window.matchMedia("(min-width: 1024px)").addEventListener("change", (e) => { if (e.matches) setOpen(false); });
+    window.matchMedia(document.documentElement.lang === "es" ? "(min-width: 1120px)" : "(min-width: 1024px)").addEventListener("change", (e) => { if (e.matches) setOpen(false); });
   }
 
   /* ---- Reveal on scroll ---- */
@@ -64,12 +81,12 @@
       e.preventDefault();
       if (!form.reportValidity()) return;
       const data = new FormData(form);
-      const topic = data.get("topic") || "General question";
-      const subject = `${topic} — from ${data.get("name")}`;
+      const topic = data.get("topic") || t.topic;
+      const subject = t.subject(topic, data.get("name"));
       const body = `${data.get("message")}\n\n—\n${data.get("name")}\n${data.get("email")}`;
       window.location.href = `mailto:${form.dataset.mailtoForm}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
       const note = form.querySelector(".form-note");
-      if (note) note.textContent = "Your email app should open with the message ready to send.";
+      if (note) note.textContent = t.sent;
     });
   }
 
