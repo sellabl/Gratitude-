@@ -38,6 +38,16 @@ Open `es/index.html`, or use the **ES** button in the header. On a deployed site
 
 Once the final domain is live, add `hreflang` links so search engines pair the two versions. In the `<head>` of each English page add `<link rel="alternate" hreflang="es" href="https://YOUR-DOMAIN/es/PAGE.html">` and `hreflang="en"` for the root page. Do the reverse in the Spanish pages.
 
+## Mobile
+
+The layout is designed phone-first at the small end (320 to 430px wide) and scales up. What it does on a phone:
+
+- Full-width buttons, a bottom-sheet style for project and bio pop-ups, and a menu that dims the page behind it. Tapping the dimmed area closes it.
+- Quotes can be swiped. The arrows stay put while the quote height follows the quote on show.
+- Form fields use 16px text so iPhones don't zoom in when you tap them.
+- The page respects the notch and home bar (`viewport-fit=cover` with safe-area padding).
+- The home page hero loads small crops from `assets/img/m/` on phones (about 180 KB instead of 720 KB). If you change a hero photo, make a matching square-ish crop there with the same file name, or delete the `<source>` line for it in the page.
+
 ## Brand colors
 
 The color variables are at the top of `assets/css/styles.css`:

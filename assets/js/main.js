@@ -29,6 +29,7 @@
     };
     menuBtn.addEventListener("click", () => setOpen(!nav.classList.contains("is-open")));
     nav.querySelectorAll(".mobile-menu a").forEach((a) => a.addEventListener("click", () => setOpen(false)));
+    nav.addEventListener("click", (e) => { if (e.target === nav) setOpen(false); }); // tap on the dimmed page
     document.addEventListener("keydown", (e) => { if (e.key === "Escape") setOpen(false); });
     window.matchMedia(document.documentElement.lang === "es" ? "(min-width: 1120px)" : "(min-width: 1024px)").addEventListener("change", (e) => { if (e.matches) setOpen(false); });
   }
@@ -51,15 +52,32 @@
     const slides = [...root.querySelectorAll(".quote-slide")];
     const photos = [...root.querySelectorAll(".quote-photo img")];
     const count = root.querySelector(".quote-count");
+    const track = root.querySelector(".quote-slides");
+    const narrow = window.matchMedia("(max-width: 1023px)");
     let i = 0;
+    // on phones/tablets the quote area is as tall as the quote on show, not the longest one
+    const fit = () => { if (track) track.style.height = narrow.matches ? `${slides[i].offsetHeight}px` : ""; };
     const show = (n) => {
       i = (n + slides.length) % slides.length;
       slides.forEach((s, k) => { s.classList.toggle("is-active", k === i); s.setAttribute("aria-hidden", String(k !== i)); });
       photos.forEach((p, k) => p.classList.toggle("is-active", k === i));
       if (count) count.textContent = `${String(i + 1).padStart(2, "0")} / ${String(slides.length).padStart(2, "0")}`;
+      fit();
     };
+    window.addEventListener("resize", fit);
+    narrow.addEventListener("change", fit);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
     root.querySelector(".prev")?.addEventListener("click", () => show(i - 1));
     root.querySelector(".next")?.addEventListener("click", () => show(i + 1));
+    // swipe left / right on touch screens
+    let x0 = null, y0 = 0;
+    root.addEventListener("touchstart", (e) => { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; }, { passive: true });
+    root.addEventListener("touchend", (e) => {
+      if (x0 === null) return;
+      const dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0;
+      x0 = null;
+      if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy) * 1.5) show(dx < 0 ? i + 1 : i - 1);
+    }, { passive: true });
     show(0);
   });
 
